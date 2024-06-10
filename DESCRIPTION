@@ -22,3 +22,5 @@ Imports:
     purrr,
     RSQLite
 RoxygenNote: 7.3.1
+URL: https://github.com/Wang-Yong2018/llmapr
+BugReports: https://github.com/Wang-Yong2018/llmapr/issues
