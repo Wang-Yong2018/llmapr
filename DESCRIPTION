@@ -8,6 +8,19 @@ Description: A shiny app and library  for connect features of multi large langua
     - M for multi models chats. chat with one or more models 
     - A for analyze picture using different models for analyzing image
     - P for probe database value, data and catalog based on large language and datbase.
-License: What license is it under?
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    base64enc,
+    DBI,
+    dbplyr,
+    dplyr,
+    httr2,
+    jsonlite,
+    logger,
+    magick,
+    purrr,
+    purrrlyr,
+    RSQLite,
+    shiny.i18n
