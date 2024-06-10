@@ -1,13 +1,21 @@
-# box::use(magick[image_info,
-#                 image_read, image_write,
-#                 image_resize])
-#
 
+
+#' resize a image to match maximum width and heigh and keep ratio
+#'
+#' @param img_path A file path to the input image file
+#' @param max_width A desired maximum image width, default 400 pix.
+#' @param max_height A desired maximum image height, default 300 pix.
+#'
+#' @return a temporary file path to resized image.
+#' @export
+#'
+#' @examples
+#' # img_path <- './image/example.jpg'
+#' # resized_img_path <- resize_image(img_path, max_width=640, max_heigh=480)
 
 resize_image <- function(img_path,max_width=400,
                          max_height=300) {
-  # resize he image to max_width* max_height size
-  # load image
+  # resize he image to max_width* max_height size load image
   img_content <- magick::image_read(img_path)
   # Read image info
   info <- magick::image_info(img_content)

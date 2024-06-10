@@ -29,6 +29,19 @@
 # # cache_dir <- cache_disk("./cache",max_age = 3600*24)
 source('R/global_constant.R')
 
+#' Set connection to large language model api service
+#'
+#' @param url  the url of model, default value is openrouter service
+#'          note: the api_key of should be existed in system environment and named as OPENROUTER_API_KEY
+#' @param timeout_seconds , default value is 30
+#'
+#' @return a htt2r request object.
+#'
+#' @export
+#'
+#' @examples
+#'  conn <- set_llm_conn()
+#'
 set_llm_conn <- function(
     url = "https://openrouter.ai/api/v1/chat/completions",
     timeout_seconds=api_timeout_seconds ) {
@@ -44,13 +57,16 @@ set_llm_conn <- function(
 
   return(req)
 }
-#'
-#'
+
+
+
 get_select_model_name <- function(model_id) {
   select_model = switch(model_id,
                        gpt35 = "openai/gpt-3.5-turbo-0125",
                        gpt4o = "openai/gpt-4o",
                        # gpt4v = "openai/gpt-4-vision-preview",
+                       'llama' = 'meta-llama/llama-3-8b-instruct:free',
+                       mistral = 'mistralai/mistral-7b-instruct:free',
                        gemini = "google/gemini-pro-1.5",
                        llama = 'meta-llama/llama-3-8b-instruct',
                        claude3s = 'anthropic/claude-3-sonnet:beta',
@@ -62,7 +78,6 @@ get_select_model_name <- function(model_id) {
   return(select_model)
 }
 
-#' @export
 get_chat_history <- function(message, role='user', last_history=NULL){
   # this function is designed to hangle the chat history
   # case 1: initial chat,
@@ -100,6 +115,26 @@ get_json_data <- function(user_input,select_model){
   json_data <- list(model = select_model, messages = json_contents)
   return(json_data)
 }
+
+
+#' get large language model  chat json data for request
+#'
+#' @param user_input  the user input
+#' @param select_model  the selected model name
+#' @param history the chat history
+#' @param max_tokens  the maximum allow tokens
+#'
+#' @return a chat request named list
+#' @export
+#'
+#' @examples
+#'  # example 1 - first chat
+#'  model_name = "mistralai/mistral-7b-instruct:free"
+#'  user_input = 'hello ai world'
+#'  post_body <- get_json_chat_data(user_input = user_input, select_mode=model_name, history=NULL )
+
+#'  # example 2 - continual chat
+#'  # TODO not full defined yet. may be append or object re-programe this function
 
 get_json_chat_data <- function(user_input, select_model, history=NULL, max_tokens = MAX_TOKENS){
   # this function is used for short memory conversation.
@@ -153,7 +188,6 @@ get_json_img <- function(user_input, img_url, select_model,image_type='file', ma
   return(json_data)
 }
 
-#' @export
 get_json_agent <- function(user_input, select_model,funcs_json){
 
   # prepare the configure
@@ -191,7 +225,6 @@ get_json_agent <- function(user_input, select_model,funcs_json){
 
 
 
-#' @export
 get_llm_post_data <- function(prompt = 'hi',
                               history = NULL,
                               llm_type = 'chat',
@@ -245,9 +278,39 @@ get_llm_post_data <- function(prompt = 'hi',
   return(post_body)
 }
 
-# get llm service result
+
+#' Get LLM response by sent request support chat, image, and agent function.
+#' @param prompt, the user input of prompt. It should be prompt engineering based on feature type(chat, image, and
+#' agent). It must be provided.
+#'
+#' @param img_url, for image llm  type , it should be the image file path.
+#' @param model_id, it is a model short name, for easy input, the inside function will convert it to full model name
+#' @param llm_type, its should be one of item in the list c('chat','sql','answer','img_url','img','agent')
+#'                  note:
+#'                  chat: for normal large language chatting. It include history feature.
+#'                  sql: for one time, text to sql feature. It convert natural language quesion to sql code
+#'                  answer: for role based Q&A. It not full implemented yet.
+#'                  img: for provide local image file path , for resize and encoding , sent to llm for analyzing. At
+#'                        present, only gemini, and gpt-4v support only
+#'                  img_url mean remote image url . The img_url not support yet.
+#'                  agent: for extract desired information from  user prompt  by predefined json template.
+#'
+#' @param history, for llm type : chat, it is a list store previously chat between user and model
+#' @param funcs_json, for llm type: agent, it is the list of json template for extract information.
+#' @param timeout_seconds, for timeout settting purpose.
+#'
 #' @export
-get_llm_result <- function(prompt='你好，你是谁',
+#'
+#' @examples
+#' # example for chat
+#'
+#' # example for image analyzing
+#'
+#' # example for agent fucntion
+#'
+#' # example for sql text 2 sql
+#'
+get_llm_result <- function(prompt='hello,who are you',
                            img_url=NULL,
                            model_id='llama',
                            llm_type='chat',
@@ -269,7 +332,7 @@ get_llm_result <- function(prompt='你好，你是谁',
     httr2::req_body_json(data = post_body, type = "application/json")
 
 
-  response_message <-  get_stream_data(request)
+  response_message <-  get_stream_data(request,timeout_sec=api_timeout_seconds)
 
   logger::log_debug(response_message)
   # print(response_message)
@@ -277,10 +340,6 @@ get_llm_result <- function(prompt='你好，你是谁',
 }
 
 
-# Function to check connection with google
-
-# Replace "https://api.labs.google.com/" with the specific Gemini API endpoint you're using
-#' @export
 check_llm_connection <- function() {
   # out of date
 
@@ -299,7 +358,6 @@ check_llm_connection <- function() {
  # return(is_connected)
 }
 
-#' @export
 llm_chat <- function(user_input, model_id='llama', history=NULL){
 
   # select_model is a fake model_info, it will be actual assigned in get_llm_result function.
@@ -322,7 +380,6 @@ llm_chat <- function(user_input, model_id='llama', history=NULL){
 
 
 
-#' @export
 get_ai_result <- function(ai_response,ai_type='chat', parameter = NULL){
 
   ai_message <- ai_response |> purrr::pluck('choices', 1, 'message')
@@ -396,7 +453,47 @@ get_ai_result <- function(ai_response,ai_type='chat', parameter = NULL){
   return(ai_result)
 }
 
-get_stream_data <- function(req,timeout_seconds=api_timeout_seconds){
+
+#' Get streamed data from large language model rest api server in chunk mode.
+#'
+#' @param req  the httr2 request instance and llm filled post json data
+#' @inheritParams httr2::req_perform_stream
+
+#' @return a openrouter format response json message which will be convert to named list
+#' normal response message is below:
+#'  https://openrouter.ai/docs/responses#response-body
+#'
+#'  For timeout case, and http response error case, only role and message will be fill meaningful string.#'
+#'
+#' openrouter http response error code map
+#'
+#' 400: Bad Request (invalid or missing params, CORS)
+#' 401: Invalid credentials (OAuth session expired, disabled/invalid API key)
+#' 402: Your account or API key has insufficient credits. Add more credits and retry the request.
+#' 403: Your chosen model requires moderation and your input was flagged
+#' 408: Your request timed out
+#' 429: You are being rate limited
+#' 502: Your chosen model is down or we received an invalid response from it
+#' 503: There is no available model provider that meets your routing requirements
+#'
+#' @export
+#'
+#' @examples
+#'  library(httr2)
+#'  library(llmapr)
+#'
+#'  model_name = "mistralai/mistral-7b-instruct:free"
+#'  user_input = 'hello ai world'
+#'  post_body <- get_json_chat_data(user_input = user_input, select_mode=model_name )
+#'
+#'  req<-
+#'    set_llm_conn() |>
+#'    req_body_json(data = post_body, type = "application/json")
+#'  req |>  get_stream_data()
+#'
+#'
+#'
+get_stream_data <- function(req,timeout_sec=30, buffer_kb=2){
   # Initialize an empty list to store the streamed data
   streamed_data <- list()
 
@@ -418,8 +515,8 @@ get_stream_data <- function(req,timeout_seconds=api_timeout_seconds){
   response <-
     try(req |>  httr2::req_perform_stream(
       process_chunk,
-      timeout_sec = timeout_seconds,
-      buffer_kb = 2,
+      timeout_sec = timeout_sec,
+      buffer_kb = buffer_kb,
       round = 'line'
     )
 

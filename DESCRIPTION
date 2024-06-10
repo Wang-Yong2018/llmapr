@@ -14,13 +14,11 @@ LazyData: true
 Imports: 
     base64enc,
     DBI,
-    dbplyr,
     dplyr,
     httr2,
     jsonlite,
     logger,
     magick,
     purrr,
-    purrrlyr,
-    RSQLite,
-    shiny.i18n
+    RSQLite
+RoxygenNote: 7.3.1

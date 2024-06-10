@@ -15,7 +15,6 @@ get_data_schema <- function(){
   return(message_db_schema)
 }
 
-#' @export
 db_connect <- function(model_db='echo') {
   # make sure we have a data directory
   if (!dir.exists("data")) dir.create("data")
@@ -34,7 +33,6 @@ db_connect <- function(model_db='echo') {
   return(con)
 }
 
-#' @export
 db_clear <- function(con ){
   message_db_schema <- get_data_schema()
   dplyr::copy_to(con,
@@ -45,13 +43,12 @@ db_clear <- function(con ){
 }
 
 # A separate function in case you want to do any data preparation (e.g. time zone stuff)
-#' @export
+
 read_messages <- function(con){
   dplyr::tbl(con, "messages")|>
     dplyr::collect()
 }
 
-#' @export
 send_message <- function(con, sender,content) {
   msg_time <-
     Sys.time( )|>

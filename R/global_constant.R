@@ -1,28 +1,19 @@
 
 # Language Configuration - English or Chinese
 app_language = 'en'
+
 i18n <- shiny.i18n::Translator$new(translation_csvs_path = "inst/extdata/translation/",
                                    translation_csv_config = 'inst/extdata/translation/config.yaml')
 i18n$set_translation_language(app_language)
 app_name <- i18n$translate('llmapr')
 
 
-# Set up logging
-# if (!requireNamespace("R.utils", quietly = TRUE)) {
-#   install.packages("R.utils")
-# }
-# renv::restore()
-# box::use(logger[log_info, log_warn,
-#                 log_debug, log_error,
-#                 log_threshold,log_formatter,formatter_pander,formatter_json,
-#                 log_layout,layout_json_parser,
-#                 log_appender, appender_file,
-#                 INFO, DEBUG, WARN,ERROR,OFF])
-# Log file configuration
-
+#DEBUG level configuration
 logger::log_formatter(logger::formatter_json)
 logger::log_layout(logger::layout_json_parser(fields = c('time', 'level', 'fn', 'pid')))
 logger::log_threshold(logger::INFO, namespace = "global")
+# IS_DEBUG <- FALSE
+
 # log_file <- './llmapr.log'
 # logger::log_appender(logger::appender_file(log_file,max_line=1000,max_files = 3L))
 # language settting
@@ -34,10 +25,9 @@ logger::log_threshold(logger::INFO, namespace = "global")
 
 
 
-IS_DEBUG <- FALSE
 
 # model list configuration
-model_id_list <- c('gpt35','gemini','llama','claude3s','mixtral','deepseekv2','phi','gpt3v','gpt4o')
+model_id_list <- c('mistral','gpt35','gemini','llama','claude3s','mixtral','deepseekv2','phi','gpt3v','gpt4o')
 sql_model_id_list <- model_id_list
 vision_model_list <- c('gpt4v','gemini')
 MAX_TOKENS <- 1000 # the max token allowed
