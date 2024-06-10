@@ -9,8 +9,7 @@
 #          jsonlite[fromJSON, toJSON])
 #
 # box::use(purrr[map_dfr, pluck])
-# box::use(cachem[cache_disk,cache_mem],
-#          memoise[memoise])
+
 # box::use(dplyr[as_tibble])
 # box::use(stringr[str_extract,str_glue])
 # box::use(rlang[abort,warn])
