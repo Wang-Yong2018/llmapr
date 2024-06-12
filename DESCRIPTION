@@ -20,7 +20,11 @@ Imports:
     logger,
     magick,
     purrr,
-    RSQLite
+    RSQLite,
+    shiny.i18n
 RoxygenNote: 7.3.1
 URL: https://github.com/Wang-Yong2018/llmapr
 BugReports: https://github.com/Wang-Yong2018/llmapr/issues
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

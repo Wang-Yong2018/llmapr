@@ -2,24 +2,16 @@
 % Please edit documentation in R/llmapi.R
 \name{set_llm_conn}
 \alias{set_llm_conn}
-\title{Set connection to large language model api service}
+\title{Set connection to openrouter model api service}
 \usage{
-set_llm_conn(
-  url = "https://openrouter.ai/api/v1/chat/completions",
-  timeout_seconds = api_timeout_seconds
-)
-}
-\arguments{
-\item{url}{the url of model, default value is openrouter service
-note: the api_key of should be existed in system environment and named as OPENROUTER_API_KEY}
-
-\item{timeout_seconds}{, default value is 30}
+set_llm_conn(api_server = NULL, api_key = NULL)
 }
 \value{
 a htt2r request object.
+        default value will be  a connection instance of openrouter url and api_key
 }
 \description{
-Set connection to large language model api service
+Set connection to openrouter model api service
 }
 \examples{
  conn <- set_llm_conn()

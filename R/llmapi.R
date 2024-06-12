@@ -28,32 +28,61 @@
 # # cache_dir <- cache_disk("./cache",max_age = 3600*24)
 source('R/global_constant.R')
 
-#' Set connection to large language model api service
+
+#' interal function to Set connection to large language model
 #'
-#' @param url  the url of model, default value is openrouter service
-#'          note: the api_key of should be existed in system environment and named as OPENROUTER_API_KEY
+#' @param url   the full url of model
+#'
+#' @param key   the api_key of the large language model. It has to be obtain from the model webpage.
+#'
 #' @param timeout_seconds , default value is 30
 #'
-#' @return a htt2r request object.
+#' @return a htt2r request object with model server url and api key.
 #'
 #' @export
 #'
 #' @examples
-#'  conn <- set_llm_conn()
+#'  conn <- set_gllm_conn(url = "https://openrouter.ai/api/v1/chat/completions",
+#'                        api_key = 'sk_fake_key')
 #'
-set_llm_conn <- function(
-    url = "https://openrouter.ai/api/v1/chat/completions",
-    timeout_seconds=api_timeout_seconds ) {
-  api_key = Sys.getenv('OPENROUTER_API_KEY')
-
+set_illm_conn <- function(url = NULL,
+                          key = NULL,
+                          timeout_seconds = 30) {
+  if (is.null(key) | is.null(url)) {
+    stop("a pair of url and key is expect to set large language model connection")
+  }
   req <- httr2::request(url) |>
     httr2::req_timeout(timeout_seconds) |>
-    httr2::req_headers(Authorization = paste0('Bearer ', api_key)) |>
-    # req_cache(tempdir(), debug = TRUE) |>
-    httr2::req_retry(max_tries = 3, backoff = ~ 1) |>
+    httr2::req_headers(Authorization = paste0('Bearer ', key)) |>
+    httr2::req_cache(tempdir()) |>
+    httr2::req_retry(max_tries = 2, backoff = ~ 1) |>
     httr2::req_progress() |>
-    httr2::req_user_agent('shiny_ai')
+    httr2::req_user_agent('llmapr')
 
+  return(req)
+}
+
+
+#' Set connection to openrouter model api service
+#' @param api_url the large language model server url(full)
+#' @param api_key_name,api_value the large language model server api key name.
+#'   - The key should be obtained from api_server
+#'   - the api_key should be loaded in os system environment
+#' @param api_key_value the large language model server api key value.
+#'   - The key name and value should be obtained from api_server
+#'   - the api_key should be loaded in os system environment
+#' @return a htt2r request object.
+#'         default value will be  a connection instance of openrouter url and api_key
+#'
+#' @export
+#' @examples
+#'  conn <- set_llm_conn()
+#'
+set_llm_conn <- function(api_server=NULL, api_key=NULL) {
+  url = "https://openrouter.ai/api/v1/chat/completions"
+  key = Sys.getenv('OPENROUTER_API_KEY')
+
+  req <- set_illm_conn(url = url, key = key)
   return(req)
 }
 
@@ -125,16 +154,13 @@ get_json_data <- function(user_input,select_model){
 #'
 #' @return a chat request named list
 #' @export
-#'
 #' @examples
 #'  # example 1 - first chat
 #'  model_name = "mistralai/mistral-7b-instruct:free"
 #'  user_input = 'hello ai world'
 #'  post_body <- get_json_chat_data(user_input = user_input, select_mode=model_name, history=NULL )
-
 #'  # example 2 - continual chat
 #'  # TODO not full defined yet. may be append or object re-programe this function
-
 get_json_chat_data <- function(user_input, select_model, history=NULL, max_tokens = MAX_TOKENS){
   # this function is used for short memory conversation.
   # The ai could remember what user said and conversation based on history topic'
