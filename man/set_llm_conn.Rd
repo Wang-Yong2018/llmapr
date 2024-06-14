@@ -4,11 +4,10 @@
 \alias{set_llm_conn}
 \title{Set connection to openrouter model api service}
 \usage{
-set_llm_conn(api_server = NULL, api_key = NULL)
+set_llm_conn()
 }
 \value{
-a htt2r request object.
-        default value will be  a connection instance of openrouter url and api_key
+a htt2r request object. which connect openrouter
 }
 \description{
 Set connection to openrouter model api service

@@ -20,7 +20,7 @@ a htt2r request object with model server url and api key.
 interal function to Set connection to large language model
 }
 \examples{
- conn <- set_gllm_conn(url = "https://openrouter.ai/api/v1/chat/completions",
+ conn <- set_illm_conn(url = "https://openrouter.ai/api/v1/chat/completions",
                        api_key = 'sk_fake_key')
 
 }

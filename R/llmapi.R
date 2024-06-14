@@ -42,7 +42,7 @@ source('R/global_constant.R')
 #' @export
 #'
 #' @examples
-#'  conn <- set_gllm_conn(url = "https://openrouter.ai/api/v1/chat/completions",
+#'  conn <- set_illm_conn(url = "https://openrouter.ai/api/v1/chat/completions",
 #'                        api_key = 'sk_fake_key')
 #'
 set_illm_conn <- function(url = NULL,
@@ -64,21 +64,13 @@ set_illm_conn <- function(url = NULL,
 
 
 #' Set connection to openrouter model api service
-#' @param api_url the large language model server url(full)
-#' @param api_key_name,api_value the large language model server api key name.
-#'   - The key should be obtained from api_server
-#'   - the api_key should be loaded in os system environment
-#' @param api_key_value the large language model server api key value.
-#'   - The key name and value should be obtained from api_server
-#'   - the api_key should be loaded in os system environment
-#' @return a htt2r request object.
-#'         default value will be  a connection instance of openrouter url and api_key
+#' @return a htt2r request object. which connect openrouter
 #'
 #' @export
 #' @examples
 #'  conn <- set_llm_conn()
 #'
-set_llm_conn <- function(api_server=NULL, api_key=NULL) {
+set_llm_conn <- function() {
   url = "https://openrouter.ai/api/v1/chat/completions"
   key = Sys.getenv('OPENROUTER_API_KEY')
 
@@ -341,6 +333,7 @@ get_llm_result <- function(prompt='hello,who are you',
                            llm_type='chat',
                            history=NULL,
                            funcs_json=NULL,
+                           llm_connection=NULL,
                            timeout_seconds=api_timeout_seconds){
   post_body <- get_llm_post_data(
     prompt = prompt,
@@ -352,12 +345,17 @@ get_llm_result <- function(prompt='hello,who are you',
   )
   logger::log_debug(paste(' the llm post data is ===> ', post_body, sep =
                             '\n'))
-  request <-
-    set_llm_conn(timeout_seconds = timeout_seconds) |>
+
+  if (is.null(llm_connection)){
+
+     llm_connection <-  set_llm_conn()
+  }
+
+  request <- llm_connection |>
     httr2::req_body_json(data = post_body, type = "application/json")
 
 
-  response_message <-  get_stream_data(request,timeout_sec=api_timeout_seconds)
+  response_message <-  get_stream_data(request,timeout_sec = api_timeout_seconds)
 
   logger::log_debug(response_message)
   # print(response_message)
